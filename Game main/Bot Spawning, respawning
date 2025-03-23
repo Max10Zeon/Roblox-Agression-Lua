@@ -1,0 +1,54 @@
+local ServerStorage = game:GetService("ServerStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local RigModels = {
+	ReplicatedStorage:WaitForChild("Noob"),
+	ReplicatedStorage:WaitForChild("Zombe"),
+	ReplicatedStorage:WaitForChild("Furry"),
+	ReplicatedStorage:WaitForChild("Evile Police Man"),
+	ReplicatedStorage:WaitForChild("Girl"),
+	ReplicatedStorage:WaitForChild("Prisoner"),
+	ReplicatedStorage:WaitForChild("Ugly Rich Guy"),
+	ReplicatedStorage:WaitForChild("Santa Clouse"),
+	ReplicatedStorage:WaitForChild("Really Strong Bacon")
+}
+
+local SpawnLocations = {}
+
+for i = 1, 28 do
+	table.insert(SpawnLocations, workspace:WaitForChild("spawns"):WaitForChild("SpawnLocation" .. i))
+end
+
+local function spawnBot(rigModel, spawnLocation)
+	local newBot = rigModel:Clone()
+	newBot.Parent = workspace
+	newBot:MoveTo(spawnLocation.Position)
+
+	local humanoid = newBot:WaitForChild("Humanoid", 5)
+	if humanoid then
+		humanoid.Health = humanoid.MaxHealth
+	end
+
+	return newBot
+end
+
+local function spawnBots(spawnLocations)
+	for _, spawnLocation in ipairs(spawnLocations) do
+		task.spawn(function()
+			while true do
+				wait(5)
+				local randomModel = RigModels[math.random(#RigModels)]
+				local bot = spawnBot(randomModel, spawnLocation)
+				local humanoid = bot:FindFirstChild("Humanoid")
+
+				if humanoid then
+					humanoid.Died:Wait()
+				end
+
+				wait(1)
+			end
+		end)
+	end
+end
+
+spawnBots(SpawnLocations)

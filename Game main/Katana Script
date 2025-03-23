@@ -1,0 +1,58 @@
+local Tool = script.Parent
+local Handle = Tool:WaitForChild("Handle")
+
+local Players = game:GetService("Players")
+local Debris = game:GetService("Debris")
+
+local Damage = 76
+local debouncedHumanoids = {} -- Tabela przechowująca humanoidy w stanie debouncowania
+
+Tool.Enabled = true
+
+function TagHumanoid(humanoid, player)
+	local Creator_Tag = Instance.new("ObjectValue")
+	Creator_Tag.Name = "creator"
+	Creator_Tag.Value = player
+	Debris:AddItem(Creator_Tag, 2)
+	Creator_Tag.Parent = humanoid
+end
+
+function Blow(Hit)
+	local character = Hit.Parent
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+	if not humanoid or humanoid.Health == 0 then
+		return
+	end
+
+	-- Sprawdzenie, czy humanoid jest w stanie debouncowania
+	if debouncedHumanoids[humanoid] then
+		return
+	end
+
+	local player = Players:GetPlayerFromCharacter(character)
+
+	if player and (player == Players:GetPlayerFromCharacter(Tool.Parent) or player.Neutral == true) then
+		return
+	end
+
+	-- Ustaw debouncowanie dla tego humanoida
+	debouncedHumanoids[humanoid] = true
+
+	humanoid:TakeDamage(Damage)
+	TagHumanoid(humanoid, Players:GetPlayerFromCharacter(Tool.Parent))
+
+	-- Usuń debouncowanie po 1 sekundzie
+	task.delay(1, function()
+		debouncedHumanoids[humanoid] = nil
+	end)
+end
+
+Tool.Activated:Connect(function()
+end)
+
+Tool.Unequipped:Connect(function()
+	Tool.Enabled = true
+end)
+
+Handle.Touched:Connect(Blow)

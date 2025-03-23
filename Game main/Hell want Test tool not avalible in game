@@ -1,0 +1,54 @@
+local Tool = script.Parent
+local Handle = Tool:WaitForChild("Handle")
+local Part1 = Tool:WaitForChild("get 3 big booms boom boom boooom")
+local characterofplayer = Tool.Parent
+local rootpart = characterofplayer:FindFirstChild("HumanoidRootPart")
+
+local Players = game:GetService("Players")
+local Debris = game:GetService("Debris")
+
+local Damage = 100000000000000000000
+
+Tool.Enabled = true
+
+function TagHumanoid(humanoid, player)
+	local Creator_Tag = Instance.new("ObjectValue")
+	Creator_Tag.Name = "creator"
+	Creator_Tag.Value = player
+	Debris:AddItem(Creator_Tag, 2)
+	Creator_Tag.Parent = humanoid
+end
+
+function Blow(Hit)
+	if Hit ~= Part1 then return end   
+
+	local character = Hit.Parent
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+	if not humanoid or humanoid.Health == 0 then
+		return
+	end
+
+	local player = Players:GetPlayerFromCharacter(character)
+
+	if player and (player == Players:GetPlayerFromCharacter(Tool.Parent) or player.Neutral == true) then
+		return
+	end
+	
+	wait(3)
+	humanoid:TakeDamage(Damage)
+
+	TagHumanoid(humanoid, Players:GetPlayerFromCharacter(Tool.Parent))
+
+	wait(0) 
+end
+
+Tool.Activated:Connect(function()
+
+end)
+
+Tool.Unequipped:Connect(function()
+	Tool.Enabled = true
+end)
+
+Part1.Touched:Connect(Blow)

@@ -1,0 +1,13 @@
+function onPlayerEntered(newPlayer)
+	wait()
+	local Stat = Instance.new("IntValue")
+	Stat.Name = "leaderstats"
+	local Cash = Instance.new("IntValue")
+	
+	Cash.Name = "Kills"
+	Cash.Value = 0
+	Cash.Parent = Stat
+	Stat.Parent = newPlayer
+end
+
+game.Players.ChildAdded:Connect(onPlayerEntered)

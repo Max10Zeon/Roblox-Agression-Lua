@@ -1,0 +1,133 @@
+--made by Max10Zeon
+local Players = game:GetService("Players")
+local NPC = script.Parent
+local Humanoid = NPC:WaitForChild("Humanoid")
+local HumanoidRootPart = NPC:WaitForChild("HumanoidRootPart")
+
+local FOLLOW_DISTANCE = 1
+local MAX_TRACK_DISTANCE = 40
+local DAMAGE_AMOUNT = 5
+local CHECK_INTERVAL = 0.1
+
+local walkAnimation = Instance.new("Animation")
+walkAnimation.AnimationId = "rbxassetid://92342246170409"
+local walkTrack = Humanoid:LoadAnimation(walkAnimation)
+
+local idleAnimation = Instance.new("Animation")
+idleAnimation.AnimationId = "rbxassetid://138350607251447"
+
+local attackAnimation = Instance.new("Animation")
+attackAnimation.AnimationId = "rbxassetid://122423898030579"
+local attackTrack = Humanoid:LoadAnimation(attackAnimation)
+
+local sound1 = NPC.Sound1
+local sound2 = NPC.Sound2
+local sound3 = NPC.Sound3
+local sound5 = NPC.Sound5
+local sounds = {sound5}
+
+local isAlive = true -- Flaga kontrolująca działanie funkcji
+
+Humanoid.Died:Connect(function()
+	isAlive = false -- Wyłącz funkcję wyszukiwania po śmierci
+	if walkTrack.IsPlaying then
+		walkTrack:Stop()
+	end
+	local randomSound = sounds[math.random(1, #sounds)]
+	randomSound:Play()
+	walkAnimation:Destroy()
+	walkTrack:Destroy()
+	local tag = Humanoid:FindFirstChild("creator")
+	if tag and tag.Value then
+		local killer = tag.Value
+		if killer:IsA("Player") then
+			local leaderstats = killer:FindFirstChild("leaderstats")
+			if leaderstats then
+				local kills = leaderstats:FindFirstChild("Kills")
+				if kills then
+					kills.Value = kills.Value + 1
+				end
+			end
+		end
+	end
+	wait(15)
+	NPC:Destroy()
+end)
+
+local function dealDamageToPlayer(player)
+	local character = player.Character
+	if character then
+		local humanoid = character:FindFirstChild("Humanoid")
+		if humanoid then
+			humanoid:TakeDamage(DAMAGE_AMOUNT)
+		end
+	end
+end
+
+local function getClosestPlayer()
+	local closestPlayer = nil
+	local closestDistance = math.huge
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		local character = player.Character
+		if character then
+			local playerRoot = character:FindFirstChild("HumanoidRootPart")
+			if playerRoot then
+				local distance = (HumanoidRootPart.Position - playerRoot.Position).Magnitude
+				if distance <= MAX_TRACK_DISTANCE and distance < closestDistance then
+					closestDistance = distance
+					closestPlayer = player
+				end
+			end
+		end
+	end
+
+	return closestPlayer, closestDistance
+end
+
+while isAlive do -- Pętla działa tylko, gdy NPC jest żywy
+	local closestPlayer, distance = getClosestPlayer()
+
+	if closestPlayer then
+		local targetRoot = closestPlayer.Character and closestPlayer.Character:FindFirstChild("HumanoidRootPart")
+		if targetRoot then
+			if distance > FOLLOW_DISTANCE then
+				if distance <= MAX_TRACK_DISTANCE then
+					Humanoid:MoveTo(targetRoot.Position)
+					if not walkTrack.IsPlaying then
+						walkTrack:Play()
+					end
+				else
+					Humanoid:MoveTo(HumanoidRootPart.Position)
+					if walkTrack.IsPlaying then
+						walkTrack:Stop()
+					end
+				end
+			else
+				Humanoid:MoveTo(HumanoidRootPart.Position)
+				if walkTrack.IsPlaying then
+					walkTrack:Stop()
+				end
+				if not attackTrack.IsPlaying then
+					attackTrack:Play()
+				end
+				dealDamageToPlayer(closestPlayer)
+				wait(attackTrack.Length)
+				attackTrack:Stop()
+			end
+		end
+	else
+		Humanoid:MoveTo(HumanoidRootPart.Position)
+		if walkTrack.IsPlaying then
+			walkTrack:Stop()
+		end
+	end
+
+	if not closestPlayer or distance > MAX_TRACK_DISTANCE then
+		if walkTrack.IsPlaying then
+			walkTrack:Stop()
+		end
+	end
+
+	wait(CHECK_INTERVAL)
+end

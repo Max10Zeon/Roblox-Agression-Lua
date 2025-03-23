@@ -1,0 +1,69 @@
+local serv = game:GetService("ServerStorage")
+local nametag = serv.NameTag 
+
+game.Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(char)
+		local leaderstats = player:FindFirstChild("leaderstats")
+		local Kills = leaderstats and leaderstats:FindFirstChild("Kills")
+
+		if not Kills then
+			return -- Exit if Kills stat doesn't exist
+		end
+
+		local head = char:WaitForChild("Head")
+		local newText = nametag:Clone()
+		local upperText = newText.UpperText
+		local lowerText = newText.LowerText
+		local humanoid = char:WaitForChild("Humanoid")
+
+		humanoid.DisplayDistanceType = "None"
+
+		newText.Parent = head
+		newText.Adornee = head
+		upperText.Text = player.Name
+
+		-- Function to update the lower text based on kills
+		local function updateNametag()
+			if Kills.Value >= 0 and Kills.Value <= 9 then
+				lowerText.Text = "(1)Newbie"
+				lowerText.TextColor3 = Color3.fromRGB(241, 241, 241)
+			elseif Kills.Value >= 10 and Kills.Value <= 20 then
+				lowerText.Text = "(2)Beginner"
+				lowerText.TextColor3 = Color3.fromRGB(255, 222, 223)
+			elseif Kills.Value >= 20 and Kills.Value <= 40 then
+				lowerText.Text = "(3)Rookie"
+				lowerText.TextColor3 = Color3.fromRGB(255, 189, 190)		
+			elseif Kills.Value >= 40 and Kills.Value <= 60 then
+				lowerText.Text = "(4)Advanced"
+				lowerText.TextColor3 = Color3.fromRGB(255, 172, 173)
+			elseif Kills.Value >= 60 and Kills.Value <= 80 then
+				lowerText.Text = "(5)Solider"
+				lowerText.TextColor3 = Color3.fromRGB(255, 158, 160)
+			elseif Kills.Value >= 80 and Kills.Value <= 110 then
+				lowerText.Text = "(6)private"
+				lowerText.TextColor3 = Color3.fromRGB(255, 172, 173)
+			elseif Kills.Value >= 110 and Kills.Value <= 150 then
+				lowerText.Text = "(7)lieutenant"
+				lowerText.TextColor3 = Color3.fromRGB(255, 151, 153)
+			elseif Kills.Value >= 150 and Kills.Value <= 190 then
+				lowerText.Text = "(8)General"
+				lowerText.TextColor3 = Color3.fromRGB(255, 121, 123)	
+			elseif Kills.Value >= 190 and Kills.Value <= 240 then
+				lowerText.Text = "(9)WeaponMaster"
+				lowerText.TextColor3 = Color3.fromRGB(255, 129, 131)	
+			elseif Kills.Value >= 240 and Kills.Value <= 300 then
+				lowerText.Text = "(10)WeaponGod"
+				lowerText.TextColor3 = Color3.fromRGB(255, 102, 105)	
+			elseif Kills.Value >= 300 and Kills.Value <= 370 then
+				lowerText.Text = "(11)Insane"
+				lowerText.TextColor3 = Color3.fromRGB(138, 0, 2)
+			end
+		end
+
+		updateNametag()
+
+		Kills.Changed:Connect(function()
+			updateNametag()
+		end)
+	end)
+end)
